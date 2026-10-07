@@ -112,8 +112,15 @@ export function validateDomainHostname(
     throw new DomainValidationError(".local domains are not supported.");
   }
 
-  // Reject IPv4 addresses
-  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(trimmed)) {
+  // Reject IPv4 addresses. Check the form the URL parser would resolve to, so
+  // equivalent encodings ("2130706433", "0x7f000001", "127.1") are caught too.
+  let host = trimmed;
+  try {
+    host = new URL(`https://${trimmed}/`).hostname;
+  } catch {
+    // Not parseable as a host; fall back to the raw value.
+  }
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
     throw new DomainValidationError("IPv4 addresses are not supported.");
   }
 

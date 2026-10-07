@@ -175,6 +175,22 @@ describe("normalize.ts", () => {
         );
       });
 
+      it("should reject equivalent IPv4 literal encodings", () => {
+        // Resolve to 127.0.0.1 / 169.254.169.254 per the WHATWG URL parser.
+        for (const form of [
+          "2130706433",
+          "0x7f000001",
+          "017700000001",
+          "127.1",
+          "127.0.1",
+          "2852039166"
+        ]) {
+          expect(() => validateDomainHostname(form)).toThrow(
+            "IPv4 addresses are not supported"
+          );
+        }
+      });
+
       it("should reject IPv6 addresses", () => {
         expect(() => validateDomainHostname("2001:db8::8a2e:370:7334")).toThrow(
           DomainValidationError
